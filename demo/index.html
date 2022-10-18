@@ -3,68 +3,104 @@
 <head>
 <meta charset="utf-8">
 <title>watermark demo</title>
+<style>
+  html,body {
+    width: 100%;
+    height: 100%;
+    padding: 0px;
+    margin: 0px;
+  }
+  #root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+  .container {
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    margin: auto;
+    width: 800px;
+    height: 800px;
+    border: 1px solid rgb(0, 0, 35);
+    overflow: hidden;
+  }
+</style>
 </head>
-<body style="display: flex; justify-content: center;align-items: center;height: 500px;">
-
-  <canvas id="myCanvas" width="500" height="500" style="border:1px solid red;">
-    您的浏览器不支持 HTML5 canvas 标签。
-  </canvas>
-
-  <script>
-    const c = document.getElementById("myCanvas");
-    const ctx = c.getContext("2d");
-    
-    const text = "leipengfei6,0.0.0.0,78:4f:43:6b:b6:46,保密信息严禁外传,娃哈哈";
-    // const text = "娃哈哈可000 99999 aa bb BB";
-    const lineSpace = 8;
-    const width = 500;
-    const height = 500;
-    const fontSize = 20;
-    const angle = 0;
-    const fontFamily = "幼圆";
-
-    const textArr = text.split(",");
-    const len = textArr.length;
-
-    ctx.translate(width / 2, height / 2);
-    ctx.rotate(angle * Math.PI / 180);
-    ctx.translate(-width / 2, -height / 2);
-
-    /** 中心圆 */
-    ctx.beginPath();
-    ctx.arc(width / 2, height / 2, 5, 0, 2 * Math.PI);
-    ctx.closePath();
-    ctx.fillStyle = "red";
-    ctx.fill();
-
-    /** 中心水平线 */
-    ctx.moveTo(0, height / 2);
-    ctx.lineTo(width, height / 2);
-    ctx.strokeStyle = "red";
-    ctx.stroke();
-
-    /** 画布框 */
-    ctx.strokeStyle = "blue";	
-    ctx.strokeRect(0, 0, width, height);
-
-    
-
-    ctx.font = `${fontSize}px ${fontFamily}`;
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "rgba(200, 200, 200, 0.6)";
-
-
-    const maxWidth = textArr.reduce((acc, cur) => ctx.measureText(cur).width > acc ? ctx.measureText(cur).width : acc, 0);
-    const maxHeight = len * fontSize + (len - 1) * lineSpace;
-    console.log(maxWidth + "   " + maxHeight);
-
-    for (let i = 0; i < len; i++) {
-      const pos =  height / 2  - (lineSpace + fontSize) * (len - 1) / 2 + i * (fontSize + lineSpace);
-      ctx.fillText(textArr[i], 0, pos);
-    }
-  
-  </script>
-
+<body>
+  <div id="root">
+    <div class="container" id="container"></div> 
+  </div>
 </body>
+
+<script>
+  const hexToRGBA = (hex, opacity = 0.8) => {
+    h = hex.slice(hex.startsWith('#') ? 1 : 0);
+    if (h.length === 3) h = [...h].map(x => x + x).join('');
+    h = parseInt(h, 16);
+    return ('rgba' + '(' + (h >>> 16) + ', ' + ((h & 0x00ff00) >>> 8) + ', ' + ((h & 0x0000ff) >>> 0) + (`, ${opacity}`) + ')');
+  };
+
+  const text = "leipengfei6,0.0.0.0,78:4f:43:6b:b6:46,保密信息严禁外传,海康威视"; // 水印
+  const lineSpace = 16; // 水印行间距，对于多行水印情况生效    
+  const fontSize = 20; // 字体大小
+  const fontFamily = "宋体"; // 字体
+  const fontColor = "#888888"; // 字体颜色
+  const angle = -45; // 旋转角度
+  const offSetX = 100; // 水平间距
+  const offSetY = 100; // 垂直间距
+  const opacity = 0.5; // 透明度度
+
+  /** canvas初始化 */
+  const el = document.getElementById("container");
+  const width = el.offsetWidth;
+  const height = el.offsetHeight;
+  const canvasMinSize = Math.SQRT2 * Math.max(width, height);
+  let canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = canvasMinSize;
+  canvas.height = canvasMinSize;
+  canvas.style.position = "absolute";
+  canvas.style.top = -Math.ceil((canvasMinSize - Math.max(width, height)) / 2) + "px";
+  canvas.style.left = -Math.ceil((canvasMinSize - Math.max(width, height)) / 2) + "px";
+
+
+  /** 画布沿中心位置旋转 */
+  ctx.translate(canvasMinSize / 2, canvasMinSize / 2);
+  ctx.rotate(angle * Math.PI / 180);
+  ctx.translate(-canvasMinSize / 2, -canvasMinSize / 2);
+
+  /** 水印设置 */
+  ctx.font = `${fontSize}px ${fontFamily}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+  ctx.fillStyle = hexToRGBA(fontColor, opacity);
+
+  const textArr = text.split(",");
+  const len = textArr.length;
+  const maxWidth = textArr.reduce((acc, cur) => ctx.measureText(cur).width > acc ? ctx.measureText(cur).width : acc, 0);
+  const maxHeight = len * fontSize + (len - 1) * lineSpace;
+  const gridWidth = maxWidth + offSetX;
+  const gridHeight = maxHeight + offSetY;
+  const rowCount = Math.ceil(canvasMinSize / gridHeight);
+  const colCount = Math.ceil(canvasMinSize / gridWidth);
+
+  for (let r = 0; r < rowCount; r++) {
+    for (let c = 0; c < colCount; c++) {
+      for (let i = 0; i < len; i++) {
+        const posX = c * gridWidth;
+        const posY =  maxHeight / 2  - (lineSpace + fontSize) * (len - 1) / 2 + i * (fontSize + lineSpace) + r * gridHeight;
+        ctx.fillText(textArr[i], posX, posY);
+      }
+    }
+  }
+
+  el.appendChild(canvas);
+
+
+</script>
+
+
 </html>
