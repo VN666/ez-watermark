@@ -4,11 +4,12 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WatermarkTest</title>
+  <title>ez-watermark</title>
   <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
   <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
   <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-  <script src="../dist/test.js"></script>
+  <!-- <script src="https://cdn.shamiao.xyz/ezwatermark.min.js"></script> -->
+  <script src="../src/Watermark.js"></script>
   <style>
     html,body {
       position: relative;
@@ -17,76 +18,127 @@
       margin: 0px;
       padding: 0px;
     }
-    .test {
+    .content {
       position: absolute;
-      width: 800px;
-      height: 800px;
-      border: 1px solid #DEDEDE;
+      width: 1200px;
+      height: 700px;
       top: 0px;
       bottom: 0px;
-      left: 0px;
-      right: 0px;
-      margin: auto;
+      margin-top: auto;
+      margin-bottom: auto;
+      left: 32px;
+      border: 1px solid #DEDEDE;
+    }
+    .panel {
+      position: absolute;
+      width: 480px;
+      height: 736px;
+      top: 0px;
+      bottom: 0px;
+      right: 32px;
+      padding: 32px 16px;
+      margin-top: auto;
+      margin-bottom: auto;
+      border: 1px solid #DEDEDE;
+      background: #FFFFFF;
+      box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.2), 0px 6px 20px 0px rgba(0, 0, 0, 0.19);
+      border-radius: 4px;
+      box-sizing: border-box;
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <el-button @click="remove">清除</el-button>
-    <el-button @click="add">添加</el-button>
-    <el-button @click="remove2">清除2</el-button>
-    <el-button @click="add2">添加2</el-button>
+    <div class="content" id="content"><h3>id:content</h3></div>
+    <div class="panel" id="panel">
+      <el-form ref="form" :model="form" label-width="96px">
+        <el-form-item label="目标元素">
+          <el-select v-model="form.el" size="mini">
+            <el-option label="body" value="body"></el-option>
+            <el-option label="content" value="content"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="水印文字">
+          <el-input v-model="form.text" type="textarea" :rows="2" size="mini"></el-input>
+        </el-form-item>
+        <el-form-item label="水印字体">
+          <el-input v-model="form.family" size="mini" style="width: 160x;"></el-input>
+        </el-form-item>
+        <el-form-item label="水印行间距">
+          <el-input-number v-model="form.lineSpace" :min="0" :max="16" size="mini"></el-input-number>
+        </el-form-item>
+        <el-form-item label="字体大小">
+          <el-input-number v-model="form.size" :min=1 size="mini"></el-input-number>
+        </el-form-item>
+        <el-form-item label="字体颜色">
+          <div style="display: flex; justify-content: flex-start; align-items: center;">
+            <el-input v-model="form.color" size="mini" style="width: 160px;"></el-input>
+            <el-color-picker slot="suffix" v-model="form.color" size="mini"></el-color-picker>
+          </div>         
+        </el-form-item>
+        <el-form-item label="水印角度">
+          <el-slider v-model="form.angle" :min="-180" :max="180" size="mini" input-size="mini" show-input></el-slider>
+        </el-form-item>
+        <el-form-item label="透明度">
+          <el-slider v-model="form.opacity" :min="0" :max="1" size="mini" :step="0.1" input-size="mini" show-input></el-slider>
+        </el-form-item>
+        <el-form-item label="水平间距">
+          <el-slider v-model="form.offsetX" :min="0" size="mini" input-size="mini" show-input></el-slider>
+        </el-form-item>
+        <el-form-item label="垂直间距">
+          <el-slider v-model="form.offsetY" :min="0" size="mini" input-size="mini" show-input></el-slider>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="add">添加水印</el-button>
+          <el-button @click="cancel">取消水印</el-button>
+        </el-form-item>
+      </el-form>
+    </div>
   </div>
-  <div class="test" id="test"></div>
-  <div></div>
   <script>
-    
-
-
-
     new Vue({
       el: "#app",
-      data: function data() {
+      data: function () {
         return {
-          visible: false
-        };
+          form: {
+            el: "content",
+            text: "ez-watermark,00:01:6C:06:A6:29,192.168.8.1,2022-10-22 00:00:00",
+            family: "宋体",
+            lineSpace: 6,
+            size: 16,
+            color: "#CFCFCF",
+            angle: -30,
+            opacity: 0.5,
+            offsetX: 120,
+            offsetY: 120
+          },
+          watermark: {
+            body: null,
+            content: null
+          }
+        }
       },
-      mounted: function mounted() {},
+      mounted: function () {
+        window.addEventListener("resize", () => {
+          if (this.watermark[this.form.el]) {
+            this.watermark[this.form.el].reDraw();
+          }
+        }, false)
+      },
       methods: {
-        remove: function remove() {
-          if (!this.watermark) return;
-          this.watermark.remove();
-          this.watermark = null;
+        add () {
+          if (!!this.watermark[this.form.el]) return; 
+          this.watermark[this.form.el] = new Watermark(this.form.el, this.form);
+          this.watermark[this.form.el].add();
         },
-        add: function add() {
-          if (!!this.watermark) return;
-          this.watermark = new Watermark("body", {
-            text: "leipengfei6,0.0.0.0,78:4f:43:6b:b6:46,保密信息严禁外传,海康威视",
-            offsetX: 120,
-            offsetY: 120,
-            angle: -30,
-            opacity: 0.1
-          });
-          this.watermark.add();
-        },
-        add2: function add2() {
-          if (!!this.watermark2) return;
-          this.watermark2 = new Watermark("test", {
-            text: "娃哈哈",
-            offsetX: 120,
-            offsetY: 120,
-            angle: -30,
-            opacity: 0.5
-          });
-          this.watermark2.add();
-        },
-        remove2: function remove2() {
-          if (!this.watermark2) return;
-          this.watermark2.remove();
-          this.watermark2 = null;
+        cancel () {
+          if (!this.watermark[this.form.el]) return;
+          this.watermark[this.form.el].remove();
+          this.watermark[this.form.el] = null;
         }
       }
-    });
+
+    }); 
   </script>
 </body>
 </html>

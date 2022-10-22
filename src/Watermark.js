@@ -1,4 +1,4 @@
-export default class Watermark {
+class Watermark {
   constructor (el, options) {
     /** 初始化配置参数 */
     this.text = options.text || ""; // 水印文字
@@ -6,11 +6,11 @@ export default class Watermark {
     this.size = options.size || 16; // 水印字体大小
     this.family = options.family || "宋体"; // 水印字体
     this.color = options.color || "#CFCFCF"; // 水印文字颜色
-    this.color = "#333";
     this.angle = options.angle || 0; 
     this.offsetX = options.offsetX || 120; // 水印水平间距
     this.offsetY = options.offsetY || 120; // 水印垂直间距
     this.opacity = options.opacity || 0.5; // 水印透明度
+    this.zIndex = options.zIndex || 10001;
     this.el = document.getElementById(el) || document.body;
 
     this.initCanvas();
@@ -96,14 +96,24 @@ export default class Watermark {
     this.div = document.createElement("div");
     this.div.style.pointerEvents = "none";
     this.div.style.position = "absolute";
+    this.div.style.left = "0px";
+    this.div.style.top = "0px";
     this.div.style.width = this.el.offsetWidth + "px";
     this.div.style.height = this.el.offsetHeight + "px";
-    this.div.style.zIndex = "10001";
+    this.div.style.zIndex = this.zIndex;
     this.div.style.background = `url('${base64}') left top no-repeat`;
+    console.log("add");
     this.el.appendChild(this.div);
   }
 
+  reDraw () {
+    console.log(1);
+    this.remove();
+    this.add();   
+  }
+
   remove () {
+    console.log("remove");
     this.el.removeChild(this.div);
   }
 }
