@@ -120,7 +120,7 @@
       mounted: function () {
         window.addEventListener("resize", () => {
           if (!!this.watermark[this.form.el]) {
-            this.watermark[this.form.el].reDraw();
+            this.watermark[this.form.el].resize();
           }
         }, false)
       },

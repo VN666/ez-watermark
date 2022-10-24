@@ -1,10 +1,10 @@
 export default class Watermark {
   constructor (el, options) {
     /** 初始化配置参数 */
-    this.text = options.text || ""; // 水印文字
+    this.text = options.text || "ez-watermark"; // 水印文字
     this.lineSpace = options.lineSpace || 8; // 水印行间距，对于多行水印情况生效
     this.size = options.size || 16; // 水印字体大小
-    this.family = options.family || "宋体"; // 水印字体
+    this.family = options.family || "Times New Roman"; // 水印字体
     this.color = options.color || "#CFCFCF"; // 水印文字颜色
     this.angle = options.angle || 0; 
     this.offsetX = options.offsetX || 120; // 水印水平间距
@@ -105,7 +105,7 @@ export default class Watermark {
     this.el.appendChild(this.div);
   }
 
-  reDraw () {
+  resize () {
     this.remove();
     this.add();   
   }

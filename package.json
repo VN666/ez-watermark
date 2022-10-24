@@ -1,8 +1,8 @@
 {
   "name": "ez-watermark",
   "version": "1.0.0",
-  "description": "watermark",
-  "main": "index.js",
+  "description": "a js watermark on dom element",
+  "main": "dist/esm/ezwatermark.min.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c ./build/rollup.config.js"
@@ -12,11 +12,20 @@
     "url": "git+https://github.com/VN666/ez-watermark.git"
   },
   "author": "vn666",
+  "keywords": [
+    "js",
+    "watermark",
+    "canvas",
+    "dom"
+  ],
   "license": "MIT",
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/VN666/ez-watermark/issues"
   },
-  "homepage": "https://github.com/VN666/ez-watermark#readme",
+  "homepage": "https://vn666.github.io/ez-watermark",
   "devDependencies": {
     "@babel/cli": "^7.19.3",
     "@babel/core": "^7.19.6",
