@@ -1,4 +1,4 @@
-class Watermark {
+export default class Watermark {
   constructor (el, options) {
     /** 初始化配置参数 */
     this.text = options.text || ""; // 水印文字
@@ -91,8 +91,8 @@ class Watermark {
     return canvasTemp.toDataURL();
   }
 
-  add () {
-    const base64 = this.toBase64();
+  add () {    
+    if (!this.base64) this.base64 = this.toBase64();
     this.div = document.createElement("div");
     this.div.style.pointerEvents = "none";
     this.div.style.position = "absolute";
@@ -101,19 +101,19 @@ class Watermark {
     this.div.style.width = this.el.offsetWidth + "px";
     this.div.style.height = this.el.offsetHeight + "px";
     this.div.style.zIndex = this.zIndex;
-    this.div.style.background = `url('${base64}') left top no-repeat`;
-    console.log("add");
+    this.div.style.background = `url('${this.base64}') left top no-repeat`;
     this.el.appendChild(this.div);
   }
 
   reDraw () {
-    console.log(1);
     this.remove();
     this.add();   
   }
 
   remove () {
-    console.log("remove");
-    this.el.removeChild(this.div);
+    if (!!this.div) {
+      this.el.removeChild(this.div);
+      this.div = null;
+    }
   }
 }
