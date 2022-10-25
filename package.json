@@ -1,6 +1,6 @@
 {
   "name": "ez-watermark",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "a js watermark on dom element",
   "main": "dist/esm/ezwatermark.min.js",
   "scripts": {
